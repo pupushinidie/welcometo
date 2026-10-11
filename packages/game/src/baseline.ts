@@ -6,7 +6,7 @@
 import { STREET_LENGTHS } from "./data.js";
 import { actionVariants, claimablePlans, placements } from "./moves.js";
 import type { Rng } from "./rng.js";
-import { applyMove, mustRefuse, sheetAfter } from "./sheet.js";
+import { applyMove, estates, isPoolSlot, mustRefuse, sheetAfter } from "./sheet.js";
 import type { GameState, Move, Submission } from "./types.js";
 
 function sheetOf(state: GameState, playerId: string) {
@@ -42,6 +42,10 @@ export function idealIndex(num: number, length: number): number {
   return Math.round((num / 17) * (length - 1));
 }
 
+/**
+ * 贪心基线：号码放在离理想位置最近的地方（同样近时优先能建泳池的组）；行动能用就用——
+ * 泳池、公园直接用，改造选 4–6 房里还能勾的最大一列，栅栏只在能立刻围出 1–6 房完成小区时画，bis 不用（扣分）。
+ */
 export function greedySubmission(state: GameState, playerId: string): Submission {
   const sheet = sheetOf(state, playerId);
   if (mustRefuse(sheet, state.combos)) return withPlans(state, playerId, null);
@@ -49,7 +53,9 @@ export function greedySubmission(state: GameState, playerId: string): Submission
   let bestScore = -Infinity;
   for (const { move, num } of placements(sheet, state.combos)) {
     if (move.temp !== undefined && move.temp === 0) continue;
-    const score = -Math.abs(idealIndex(num, STREET_LENGTHS[move.street]!) - move.house) - (move.temp !== undefined ? 0.5 : 0);
+    const combo = state.combos[move.combo]!;
+    let score = -Math.abs(idealIndex(num, STREET_LENGTHS[move.street]!) - move.house) - (move.temp !== undefined ? 0.5 : 0);
+    if (combo.action === "pool" && isPoolSlot(move.street, move.house)) score += 0.75;
     if (score > bestScore) {
       bestScore = score;
       best = move;
@@ -59,5 +65,15 @@ export function greedySubmission(state: GameState, playerId: string): Submission
   const combo = state.combos[base.combo]!;
   const after = applyMove(sheet, base, combo, state.round).sheet;
   const variants = actionVariants(after, base, combo);
-  return withPlans(state, playerId, variants[0] ?? base);
+  let chosen: Move = base;
+  if (combo.action === "pool" || combo.action === "park") chosen = variants[0] ?? base;
+  if (combo.action === "improve") {
+    const pick = [...variants].sort((a, b) => (b.improve ?? 0) - (a.improve ?? 0)).find((variant) => (variant.improve ?? 0) >= 4) ?? variants[0];
+    chosen = pick ?? base;
+  }
+  if (combo.action === "fence") {
+    const before = estates(after).length;
+    chosen = variants.find((variant) => estates(applyMove(sheet, variant, combo, state.round).sheet).length > before) ?? base;
+  }
+  return withPlans(state, playerId, chosen);
 }
