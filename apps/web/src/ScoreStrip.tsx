@@ -85,11 +85,11 @@ export function ScoreStrip({ sheet, base, plans, score, improvable, onImprove, c
               </>
             );
             return can ? (
-              <button key={size} type="button" className="wt-estate-col can" onClick={() => onImprove?.(size)} data-improve={size} aria-label={`改造 ${size} 房小区`}>
+              <button key={size} type="button" className="wt-estate-col can" onClick={() => onImprove?.(size)} data-improve={size} data-tutorial={`improve:${size}`} aria-label={`改造 ${size} 房小区`}>
                 {body}
               </button>
             ) : (
-              <span key={size} className={`wt-estate-col${ticked > before ? " draft" : ""}`} data-improve={size}>
+              <span key={size} className={`wt-estate-col${ticked > before ? " draft" : ""}`} data-improve={size} data-tutorial={`improve:${size}`}>
                 {body}
               </span>
             );

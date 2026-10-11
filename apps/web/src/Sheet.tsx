@@ -80,8 +80,9 @@ export function SheetView({ sheet, base, plans, layout, targets = {}, recentRoun
                 const poolDraft = pool && base && !base.pools[street]![index];
                 const recent = !!house && !draft && recentRound !== undefined && house.round === recentRound;
                 const clickable = legal || bisTarget;
-                const onClick = legal ? () => targets.onHouse?.(street, index) : bisTarget ? () => targets.onBis?.(street, index) : undefined;
-                const cls = `wt-lot${house ? " built" : ""}${draft ? " draft" : ""}${legal ? (targets.housesQuiet ? " movable" : " legal") : ""}${bisTarget ? " bis-target" : ""}${dim ? " dim" : ""}${recent ? " recent" : ""}`;
+                // 已经选好位置、正在挑 bis 的空地时，bis 优先（这块地也可能还能换位置）
+const onClick = bisTarget ? () => targets.onBis?.(street, index) : legal ? () => targets.onHouse?.(street, index) : undefined;
+                const cls = `wt-lot${house ? " built" : ""}${draft ? " draft" : ""}${legal && !bisTarget ? (targets.housesQuiet ? " movable" : " legal") : ""}${bisTarget ? " bis-target" : ""}${dim ? " dim" : ""}${recent ? " recent" : ""}`;
                 const content = (
                   <>
                     <span className="wt-house-pic">
@@ -95,11 +96,11 @@ export function SheetView({ sheet, base, plans, layout, targets = {}, recentRoun
                   </>
                 );
                 return clickable ? (
-                  <button key={index} type="button" className={cls} onClick={onClick} data-house={key} aria-label={`${STREET_NAMES[street]}第 ${index + 1} 格${house ? `：${house.num}` : ""}`}>
+                  <button key={index} type="button" className={cls} onClick={onClick} data-house={key} data-tutorial={`house:${key}`} aria-label={`${STREET_NAMES[street]}第 ${index + 1} 格${house ? `：${house.num}` : ""}`}>
                     {content}
                   </button>
                 ) : (
-                  <div key={index} className={cls} data-house={key}>
+                  <div key={index} className={cls} data-house={key} data-tutorial={`house:${key}`}>
                     {content}
                   </div>
                 );
@@ -115,14 +116,14 @@ export function SheetView({ sheet, base, plans, layout, targets = {}, recentRoun
                 const style = { left: `${left}px` } as CSSProperties;
                 if (can) {
                   return (
-                    <button key={pos} type="button" className="wt-fence-slot can" style={style} onClick={() => targets.onFence?.(street, pos)} aria-label={`在${STREET_NAMES[street]}第 ${pos + 1}、${pos + 2} 格之间画栅栏`} data-fence={key}>
+                    <button key={pos} type="button" className="wt-fence-slot can" style={style} onClick={() => targets.onFence?.(street, pos)} aria-label={`在${STREET_NAMES[street]}第 ${pos + 1}、${pos + 2} 格之间画栅栏`} data-fence={key} data-tutorial={`fence:${key}`}>
                       <i />
                     </button>
                   );
                 }
                 if (!on) return null;
                 return (
-                  <span key={pos} className={`wt-fence-slot on${draft ? " draft" : ""}`} style={style} data-fence={key} onClick={draft ? () => targets.onFence?.(street, pos) : undefined}>
+                  <span key={pos} className={`wt-fence-slot on${draft ? " draft" : ""}`} style={style} data-fence={key} data-tutorial={`fence:${key}`} onClick={draft ? () => targets.onFence?.(street, pos) : undefined}>
                     {!compact && <img src={ART.fence} alt="" width={8 * layout.hs} height={32 * layout.hs} draggable={false} />}
                   </span>
                 );

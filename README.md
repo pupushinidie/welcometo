@@ -100,6 +100,16 @@ BASE_PATH=/welcometo/ npm run build
 | `apps/web` | 网页 |
 | `art/` | 美术 agent 的出图脚本和规格（`art/spec.md`），定稿在 `apps/web/public/art/` |
 
+## 新手教程
+
+站内统一做法（`~/projects/pipeline/handbook/tutorial-notes.md`）：剧本局 + 练习局 + 「第一次遇到」小贴士，向导咕噜嘎。
+
+- 剧本 `packages/game/src/tutorial.ts`（`TUTORIAL_STEPS`）：6 回合，依次教 选组填号码（递增）→ 小区 → 泳池 → 栅栏和目标卡（你和咕噜一号同回合首批完成 n°3，都拿 7 分）→ 临时工 → 改造 → bis，再讲拒批、结束、计分、托管。开局表先写了几个号码；3 堆前 7 张按剧本排好（`scripts/tutorial-deck.ts` 算的），两个咕噜每回合交什么也写死。剧本单测 `test/tutorial.test.ts`。
+- 一个 do 步骤是交一整手：`stageOf / stageAnchor / stageAllows` 按界面草稿算出下一个要点的地方（选组 → 改号码 → 空地 → 行动 → 确认提交），GameBoard 的 `allow(what)` 拦下别的点击。
+- 网页 `apps/web/src/tutorial/`：教练层（Coach、gulu、useTutorial、tips、storage、Invite，从谁是牛头王复制）+ 本游戏的 `TutorialMode.tsx`、`tutorialGame.ts`（小贴士）。入口在首页和等候房间，地址带 `?tutorial` 直接打开。
+- 「提示」：练习局、或者只有自己和人机的房间里有，等于让人机从你的位置算一手（`botHint`），并把草稿摆好，还要你自己点确认。
+- 走查：`scripts/tut-all.sh <输出目录>`（四种可视区域 × 夜/日，逐步量高亮、遮挡、字号、滚动；1440 夜间和 390 白天跟着提示把练习局打完）。
+
 ## 画面：白天版和夜间版
 
 只有像素风一种画面，配色分夜间（深色，默认）和白天（白底）。白天版由 `apps/web/day-theme.ts` 按 `day-palette.ts` 从夜间样式生成，手调的写在 `src/theme-day.css`；选择记在 `gm-pixel-theme`，全站共用。

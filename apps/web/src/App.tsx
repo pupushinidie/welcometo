@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEven
 import {
   ACTION_NAMES,
   ACTIONS,
+  botHint,
   CAPACITY_OPTIONS,
   type Capacity,
   type GameCommand,
@@ -306,6 +307,10 @@ function App() {
           watchId={watched}
           onWatch={setWatchId}
           onLeave={leaveRoom}
+          onHint={() => {
+            const mine = room.members.find((member) => member.id === socket.id);
+            return mine && room.game ? botHint(room.game, mine.playerId) : null;
+          }}
         />
         {confirmDialog}
       </main>

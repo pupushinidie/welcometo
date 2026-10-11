@@ -40,6 +40,9 @@ import { GameRoomMenu } from "./RoomExtras.js";
 import { ScoreStrip } from "./ScoreStrip.js";
 import { SheetView, type SheetTargets } from "./Sheet.js";
 import { socket } from "./socket.js";
+import { TipToast } from "./tutorial/Coach.js";
+import { useFirstTimeTips } from "./tutorial/tips.js";
+import { detectTips, GAME_ID, TIPS } from "./tutorial/tutorialGame.js";
 
 export interface GameBoardProps {
   readonly room: LobbyRoomSnapshot;
@@ -192,12 +195,13 @@ function GameBoard(props: GameBoardProps) {
       setHint(null);
     }
   }, [game.round]);
-  const pendingRef = useRef<Submission | null>(me.pending);
+  // 只在同一回合里撤回时恢复（结算后 pending 也会清空，那时不能把上一回合的一手当成草稿）
+  const pendingRef = useRef<{ pending: Submission | null; round: number }>({ pending: me.pending, round: game.round });
   useEffect(() => {
     const before = pendingRef.current;
-    pendingRef.current = me.pending;
-    if (before && !me.pending && !me.submitted && game.phase === "play") setDraft(draftFromSubmission(before, game));
-  }, [me.pending, me.submitted]);
+    pendingRef.current = { pending: me.pending, round: game.round };
+    if (before.pending && before.round === game.round && !me.pending && !me.submitted && game.phase === "play") setDraft(draftFromSubmission(before.pending, game));
+  }, [me.pending, me.submitted, game.round]);
 
   // 结算提示：首批验证、拒批、重洗（按 version 记，5 秒后消失；计时器表只在卸载时清空）
   const [flash, setFlash] = useState<{ version: number; text: string } | null>(null);
@@ -349,6 +353,7 @@ function GameBoard(props: GameBoardProps) {
     return () => document.removeEventListener("visibilitychange", update);
   }, [canAct]);
 
+  const tips = useFirstTimeTips(GAME_ID, game.version, () => detectTips(game, spectating ? "" : me.id, autoPlaying), TIPS, mode === "online" && !spectating);
   const waiting = waitingFor(game);
   const memberOf = (player: Player): LobbyMember | undefined => room.members.find((candidate) => candidate.playerId === player.id);
   const botsOnly = !spectating && room.members.length > 1 && room.members.every((candidate) => candidate.id === member?.id || candidate.bot === true);
@@ -405,7 +410,7 @@ function GameBoard(props: GameBoardProps) {
       const next = PARK_TRACKS[street]![placed.parks[street]! + 1]!;
       return (
         <label className="wt-check" data-tutorial="action-toggle">
-          <input type="checkbox" checked={draft.park} onChange={(event) => update({ park: event.target.checked })} />
+          <input type="checkbox" checked={draft.park} onChange={(event) => allow("toggle:park") && update({ park: event.target.checked })} />
           在{STREET_NAMES[street]}建一个公园（公园到 {next} 分）
         </label>
       );
@@ -413,7 +418,7 @@ function GameBoard(props: GameBoardProps) {
     if (combo.action === "pool" && isPoolSlot(draft.spot.street, draft.spot.house)) {
       return (
         <label className="wt-check" data-tutorial="action-toggle">
-          <input type="checkbox" checked={draft.pool} onChange={(event) => update({ pool: event.target.checked })} />
+          <input type="checkbox" checked={draft.pool} onChange={(event) => allow("toggle:pool") && update({ pool: event.target.checked })} />
           建泳池（泳池到 {POOL_TRACK[placed.poolTrack + 1]} 分）
         </label>
       );
@@ -430,14 +435,14 @@ function GameBoard(props: GameBoardProps) {
           const value = plan.approvedRound === null ? plan.high : plan.low;
           return (
             <label className="wt-check" key={index}>
-              <input type="checkbox" checked={!draft.skipPlans.includes(index)} onChange={(event) => update({ skipPlans: event.target.checked ? draft.skipPlans.filter((p) => p !== index) : [...draft.skipPlans, index] })} />
+              <input type="checkbox" checked={!draft.skipPlans.includes(index)} onChange={(event) => allow(`plan:${index}`) && update({ skipPlans: event.target.checked ? draft.skipPlans.filter((p) => p !== index) : [...draft.skipPlans, index] })} />
               验证目标卡 n°{index + 1}（+{value} 分{plan.approvedRound === null ? "，首批" : ""}）
             </label>
           );
         })}
         {firstAvailable && (
           <label className="wt-check small" data-tutorial="reshuffle">
-            <input type="checkbox" checked={draft.reshuffle} onChange={(event) => update({ reshuffle: event.target.checked })} />
+            <input type="checkbox" checked={draft.reshuffle} onChange={(event) => allow("reshuffle") && update({ reshuffle: event.target.checked })} />
             如果我首个完成目标卡，就把牌全部重洗
           </label>
         )}
@@ -506,7 +511,7 @@ function GameBoard(props: GameBoardProps) {
                     const value = combo!.num + delta;
                     if (value < 0 || value > 17) return null;
                     return (
-                      <button key={delta} type="button" className={`quiet-button${draft.temp === delta ? " on" : ""}`} data-temp={delta}
+                      <button key={delta} type="button" className={`quiet-button${draft.temp === delta ? " on" : ""}`} data-temp={delta} data-tutorial={`temp:${delta}`}
                         onClick={() => allow(`temp:${delta}`) && update({ temp: draft.temp === delta ? null : delta, spot: null, skipPlans: [] })} aria-pressed={draft.temp === delta}>
                         {value}
                       </button>
@@ -712,6 +717,7 @@ function GameBoard(props: GameBoardProps) {
           {chat}
         </section>
         {final}
+        {tips.tip && <TipToast tip={tips.tip} onClose={tips.dismiss} onNever={tips.never} />}
         {props.overlay}
       </div>
     );
@@ -744,6 +750,7 @@ function GameBoard(props: GameBoardProps) {
       {flashLine}
       {chatDrawer}
       {final}
+      {tips.tip && <TipToast tip={tips.tip} onClose={tips.dismiss} onNever={tips.never} />}
       {props.overlay}
     </div>
   );

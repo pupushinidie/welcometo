@@ -1,0 +1,7 @@
+/* 欢迎来到的教程皮肤补充（教练层共用样式在 tutorial.css）。 */
+.wt-tut-tag { white-space: nowrap; }
+.tut-checklist h3 { margin: 0 0 6px; color: var(--gold); font-size: 12px; font-weight: 400; }
+.tut-checklist ul { margin: 0; padding: 0; list-style: none; font-size: 12px; }
+.tut-checklist p { margin: 4px 0 0; font-size: 12px; }
+/* 教程里不显示托管、解散（GameBoard 已按 mode 处理），聊天按钮换成进度没有意义 */
+.tut-script .wt-top-right [data-chat], .tut-practice .wt-top-right [data-chat] { display: none; }
