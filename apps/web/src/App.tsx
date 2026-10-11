@@ -19,6 +19,7 @@ import { roomRole, RoomSettingsPanel, SeatSwitch } from "./RoomExtras.js";
 import { forgetSeat, readName, readSeat, rememberName, rememberSeat, retryable } from "./seat.js";
 import { socket } from "./socket.js";
 import { ThemeToggle, useTheme, type Theme } from "./theme.js";
+import { NO_BGM, SoundToggle, useBgm } from "./gm-sound.js";
 import { TutorialInvite } from "./tutorial/Invite.js";
 import { readTutorial } from "./tutorial/storage.js";
 import { GAME_ID } from "./tutorial/tutorialGame.js";
@@ -53,7 +54,7 @@ function App() {
   const [capacity, setCapacity] = useState<Capacity>(4);
   const [confirmAction, confirmDialog] = useConfirm();
   const [theme, toggleTheme] = useTheme();
-  const themeToggle = <ThemeToggle theme={theme} onToggle={toggleTheme} />;
+  const themeToggle = <><ThemeToggle theme={theme} onToggle={toggleTheme} /><SoundToggle /></>;
   const [roomCode, setRoomCode] = useState("");
   const [room, setRoom] = useState<LobbyRoomSnapshot | null>(null);
   const [connected, setConnected] = useState(socket.connected);
@@ -65,6 +66,8 @@ function App() {
   const voice = useVoice(room);
   // 新手教程：首页或等候房间点进来（地址带 ?tutorial 时直接打开）
   const [tutorialOpen, setTutorialOpen] = useState(() => new URLSearchParams(window.location.search).has("tutorial"));
+  // 声音：进了房间（等候房间、对局、观战）和新手教程里顶栏有 ♪ 面板（音效、语音音量）；这款还没有背景音乐。
+  useBgm(room || tutorialOpen ? NO_BGM : null);
   function closeTutorial() {
     setTutorialOpen(false);
     const params = new URLSearchParams(window.location.search);
