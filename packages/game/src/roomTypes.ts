@@ -1,7 +1,7 @@
 import type { GameCommand, GameState } from "./types.js";
 
-/** 房间人数：2–4 人（规格书第 1 节）。 */
-export const CAPACITY_OPTIONS = [2, 3, 4] as const;
+/** 房间人数：2–6 人（开工拍板一桌最多 6 人；一个人开房时加人机凑够 2 座以上）。 */
+export const CAPACITY_OPTIONS = [2, 3, 4, 5, 6] as const;
 export type Capacity = (typeof CAPACITY_OPTIONS)[number];
 
 export interface LobbyMember {
@@ -115,6 +115,7 @@ export interface PublicRoomSummary {
 		readonly isHost: boolean;
 		readonly connected: boolean;
 		readonly bot?: boolean;
+		/** 当前总分（按现在的表算）。 */
 		readonly score?: number;
 		readonly isActive?: boolean;
 		readonly isWinner?: boolean;

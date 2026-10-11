@@ -1,20 +1,29 @@
 export * from "./types.js";
-export * from "./board.js";
+export * from "./data.js";
+export * from "./sheet.js";
 export {
-  advanceRunners,
+  ANIMATION,
+  animationMs,
   apply,
   applyCommand,
-  bustProbability,
+  checkSubmission,
   createGame,
+  DEFAULT_CONFIG,
   defaultConfig,
-  legalActions,
-  moveOptions,
+  fallbackSubmission,
+  normalizeCommand,
+  rankPlayers,
+  redactGameForSpectator,
   redactGameForViewer,
+  resolveSubmission,
+  scoreAll,
+  stepKey,
+  testRng,
   timeoutTurn,
+  waitingFor,
 } from "./engine.js";
-export type { NewPlayer } from "./engine.js";
-export { botCommand } from "./bot.js";
-export { createRng } from "./rng.js";
+export type { CreateOptions, NewPlayer, TimeoutPolicy } from "./engine.js";
+export { chachaBlock, createRng, createSecureRng, restoreRng, rngFromSeed } from "./rng.js";
 export type { Rng } from "./rng.js";
 export { CAPACITY_OPTIONS, DEFAULT_ROOM_ACCESS } from "./roomTypes.js";
 export type {
@@ -36,3 +45,4 @@ export type {
   VoiceParticipant,
   VoiceSignal,
 } from "./roomTypes.js";
+export { actionVariants, claimablePlans, legalMoves, placements } from "./moves.js";
