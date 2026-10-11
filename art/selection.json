@@ -1,0 +1,135 @@
+{
+ "pick": {
+  "bg-night": "s11",
+  "bg-day": "s11",
+  "houses": "B",
+  "lot": "lot0",
+  "mini": "mini16",
+  "strip": "v2",
+  "fence": "post",
+  "park-empty": "pe7",
+  "park-tree": "pt0",
+  "pool": "pf15",
+  "act-fence": "1",
+  "act-improve": "0",
+  "act-park": "0",
+  "act-pool": "3",
+  "act-temp": "18",
+  "act-bis": "0",
+  "stamp-ok": "0",
+  "stamp-no": "0",
+  "cards": "frame84",
+  "plans": "rivet91",
+  "cover": "a-s72"
+ },
+ "candidates": {
+  "bg-night": {
+   "s11": "/Users/pp/projects/pipeline/games/welcometo/assets/work/raw/pastel-scene.png",
+   "s12": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-night-s12.png",
+   "s13": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-night-s13.png",
+   "s14": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-night-s14.png"
+  },
+  "bg-day": {
+   "s11": "/Users/pp/projects/pipeline/games/welcometo/assets/work/raw/pastel-day.png",
+   "s12": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-day-s12.png",
+   "s13": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-day-s13.png",
+   "s14": "/Users/pp/projects/pipeline/games/welcometo/art/out/r1/bg-day-s14.png"
+  },
+  "houses": {
+   "A": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/houses-A.png",
+   "B": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/houses-B.png",
+   "C": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/houses-C.png"
+  },
+  "lot": {
+   "lot0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/lot-lot0.png",
+   "lot5": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/lot-lot5.png",
+   "lot35": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/lot-lot35.png"
+  },
+  "mini": {
+   "mini16": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/mini-mini16.png",
+   "mini0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/mini-mini0.png",
+   "mini9": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/mini-mini9.png"
+  },
+  "strip": {
+   "v1": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/strip-v1.png",
+   "v2": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/strip-v2.png",
+   "v3": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/strip-v3.png"
+  },
+  "fence": {
+   "post": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/fence-post.png",
+   "pickets": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/fence-pickets.png",
+   "13": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/fence-13.png"
+  },
+  "park-empty": {
+   "pe7": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-empty-pe7.png",
+   "pe14": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-empty-pe14.png",
+   "pe22": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-empty-pe22.png"
+  },
+  "park-tree": {
+   "pt0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-tree-pt0.png",
+   "pt5": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-tree-pt5.png",
+   "pt32": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/park-tree-pt32.png"
+  },
+  "pool": {
+   "pf15": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/pool-pf15.png",
+   "pf17": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/pool-pf17.png",
+   "pf24": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/pool-pf24.png"
+  },
+  "act-fence": {
+   "1": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-fence-1.png",
+   "24": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-fence-24.png",
+   "20": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-fence-20.png"
+  },
+  "act-improve": {
+   "0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-improve-0.png",
+   "9": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-improve-9.png",
+   "16": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-improve-16.png"
+  },
+  "act-park": {
+   "0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-park-0.png",
+   "3": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-park-3.png",
+   "32": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-park-32.png"
+  },
+  "act-pool": {
+   "3": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-pool-3.png",
+   "35": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-pool-35.png",
+   "13": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-pool-13.png"
+  },
+  "act-temp": {
+   "18": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-temp-18.png",
+   "4": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-temp-4.png",
+   "33": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-temp-33.png"
+  },
+  "act-bis": {
+   "0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-bis-0.png",
+   "2": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-bis-2.png",
+   "16": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/act-bis-16.png"
+  },
+  "stamp-ok": {
+   "0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-ok-0.png",
+   "9": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-ok-9.png",
+   "16": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-ok-16.png"
+  },
+  "stamp-no": {
+   "0": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-no-0.png",
+   "6": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-no-6.png",
+   "16": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/stamp-no-16.png"
+  },
+  "cards": {
+   "frame84": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/cards-frame84.png",
+   "code": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/cards-code.png",
+   "flat": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/cards-flat.png"
+  },
+  "plans": {
+   "rivet91": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/plans-rivet91.png",
+   "cream94": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/plans-cream94.png",
+   "code": "/Users/pp/projects/pipeline/games/welcometo/art/out/cand/plans-code.png"
+  },
+  "cover": {
+   "a-s72": "/Users/pp/projects/pipeline/games/welcometo/art/out/covers/cover-a-s72.png",
+   "b-s74": "/Users/pp/projects/pipeline/games/welcometo/art/out/covers/cover-b-s74.png",
+   "c-s71": "/Users/pp/projects/pipeline/games/welcometo/art/out/covers/cover-c-s71.png"
+  }
+ },
+ "note": "候选在 out/r1/（PixelLab 原图）和 out/cand/（预览）；python art/export.py 按 pick 重新导出 out/final/"
+}

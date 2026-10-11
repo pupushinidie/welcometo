@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0c1120" />
+    <!-- 白天 / 夜间画面：样式生效前先定下来，打开页面时不会先闪一下深色（见 src/theme.tsx） -->
+    <script>try { if (localStorage.getItem("gm-pixel-theme") === "day") document.documentElement.dataset.theme = "day"; } catch (e) {}</script>
+    <link rel="icon" type="image/png" href="/art/sprites/climber-red.png" />
+    <meta name="description" content="欢迎来到：1–6 人同时翻牌填表的郊区建房桌游，网页联机。" />
+    <title>欢迎来到 · 在线对战</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+/*
+ * 白天版手调的部分。大部分白天样式由 day-theme.ts 从 app-pixel.css、cantstop.css 换色生成，
+ * 这里只放机械换色不合适的地方；选择器都以 :root[data-theme="day"] 开头。
+ */
+:root[data-theme="day"] { color-scheme: light; }
+:root[data-theme="day"] .app-shell * { scrollbar-color: #aebad0 var(--bg); }
+
+/* 雪山场景里叠着的提示条、横幅还是深底，字和描边用回夜间的颜色 */
+:root[data-theme="day"] .cs-stage { --text: #eef3fb; --muted: #93a3bd; --edge: #04060c; --shade: #080c17; }
+
+/* 登山队里还没占领的路线格：夜间的亮边在白底上看不见，换成灰蓝描边 */
+:root[data-theme="day"] .cs-slot { box-shadow: inset 0 0 0 var(--px) #aebad0; }
