@@ -68,3 +68,23 @@ export type { Chooser, ExactSpec, PlayerSpec, SceneName, SceneOptions, SceneRoom
 export { sheetProblems, stateProblems } from "./validate.js";
 export { BOT_WEIGHTS, botCommand, botDecision, botHint, evaluateSheet, idealSlot } from "./bot.js";
 export type { BotDecision, BotWeights } from "./bot.js";
+export {
+  anchorCandidates,
+  anchorVisible,
+  createPracticeGame,
+  createTutorialGame,
+  sameMove,
+  selfCanAct,
+  stageAllows,
+  stageAnchor,
+  stageOf,
+  TUTORIAL_BOTS,
+  TUTORIAL_PLANS,
+  TUTORIAL_SELF,
+  TUTORIAL_SHEETS,
+  TUTORIAL_STACK_HEADS,
+  TUTORIAL_STEPS,
+  tutorialActor,
+  tutorialStacks,
+} from "./tutorial.js";
+export type { StageNotes, TutorialFace, TutorialMove, TutorialStage, TutorialStep } from "./tutorial.js";
