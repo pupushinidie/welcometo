@@ -244,6 +244,9 @@ button.wt-fence-slot:hover i { width: 6px; background: repeating-linear-gradient
 .wt-park.draft img { filter: drop-shadow(2px 0 0 #f6d77c) drop-shadow(-2px 0 0 #f6d77c); }
 
 .wt-viewing { display: flex; align-items: center; gap: 10px; padding: 4px 8px; color: var(--seat-ink); background: var(--seat); font-size: 12px; }
+.wt-plans .wt-viewing { flex-direction: column; align-items: flex-end; margin-left: auto; padding: 8px 12px; }
+.wt-plans .wt-viewing .quiet-button { margin-left: 0; }
+.wt-num b { font-weight: 400; }
 .wt-viewing b { font-weight: 400; font-size: 24px; }
 .wt-viewing .quiet-button { margin-left: auto; }
 

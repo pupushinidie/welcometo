@@ -275,7 +275,16 @@ function GameBoard(props: GameBoardProps) {
   function pickCombo(index: number) {
     if (!canAct || !allow(`combo:${index}`)) return;
     if (draft.combo === index) return;
-    update({ ...EMPTY_DRAFT, combo: index });
+    const picked = game.combos[index]!;
+    let temp: number | null = null;
+    // 临时工组：原号码没地方放时，先帮他挑一个能放的调整（离原号码最近的），他还可以再换
+    if (picked.action === "temp" && legalHouses(sheet, picked.num).length === 0) {
+      const option = comboNumbers(sheet, picked)
+        .filter((item) => item.temp !== undefined && legalHouses(sheet, item.num).length > 0)
+        .sort((a, b) => Math.abs(a.temp!) - Math.abs(b.temp!))[0];
+      if (option) temp = option.temp!;
+    }
+    update({ ...EMPTY_DRAFT, combo: index, temp });
   }
   function pickSpot(street: number, house: number) {
     if (!canAct || !allow(`house:${street}:${house}`)) return;
@@ -504,7 +513,7 @@ function GameBoard(props: GameBoardProps) {
                     );
                   })}
                 </div>
-                <small>{draft.temp === null ? "不点就不雇临时工" : `雇 1 个临时工（${draft.temp === 0 ? "号码不变也算一个" : `${draft.temp > 0 ? "+" : ""}${draft.temp}`}）`}</small>
+                <small>{draft.temp === null ? "不点就不雇临时工" : `雇 1 个临时工（${draft.temp === 0 ? "号码不变也算一个" : `${draft.temp > 0 ? "+" : ""}${draft.temp}`}）`}{legalHouses(sheet, combo!.num).length === 0 ? "。原号码放不下，只能改号码" : ""}</small>
               </div>
             )}
             {!draft.spot ? (
@@ -580,7 +589,7 @@ function GameBoard(props: GameBoardProps) {
       layout={layout}
       targets={viewingOther ? {} : targets}
       recentRound={game.round - (playing ? 1 : 0)}
-      label={sheetLabel}
+      label={layout.mode === "phone" ? sheetLabel : undefined}
     />
   );
   const strip = (
@@ -608,7 +617,8 @@ function GameBoard(props: GameBoardProps) {
           compact={layout.mode === "phone"}
         />
       ))}
-      {layout.mode === "desk" && (
+      {layout.mode === "desk" && viewingOther && sheetLabel}
+      {layout.mode === "desk" && !viewingOther && (
         <div className="wt-deck" data-tutorial="deck">
           <span>第 <b>{game.round}</b> 回合</span>
           <small>三堆还剩 {game.stacks.map((stack) => stack.drawCount).join(" / ")} 张</small>
@@ -674,7 +684,7 @@ function GameBoard(props: GameBoardProps) {
 
   if (layout.mode === "phone") {
     return (
-      <div className="wt-screen phone" style={vars}>
+      <div className="wt-screen phone" style={vars} data-round={game.round}>
         <header className="wt-top">
           <div className={`wt-ptop${urgent ? " urgent" : ""}`} data-tutorial="prompt">
             <strong className="wt-prompt" role="status">{prompt}</strong>
@@ -708,7 +718,7 @@ function GameBoard(props: GameBoardProps) {
   }
 
   return (
-    <div className="wt-screen desk" style={vars}>
+    <div className="wt-screen desk" style={vars} data-round={game.round}>
       <header className="wt-top">
         {brand}
         <div className="wt-top-right">{menuItems}{connection}</div>
@@ -817,7 +827,7 @@ function FinalDialog({ game, room, myId, memberId, spectating, onRematch, onLeav
                 const s = result.scores[player.id]!;
                 return (
                   <tr key={player.id} className={`${player.id === myId ? "me" : ""}${result.winners.includes(player.id) ? " winner" : ""}`}>
-                    <td className="wt-num big">{result.ranks[player.id]}</td>
+                    <td className="wt-num big"><b>{result.ranks[player.id]}</b></td>
                     <td>
                       <span className="wt-who" style={{ "--seat": seatColor(player.seat) } as CSSProperties}>{player.id === myId ? `${player.name}（你）` : player.name}</span>
                       <small className="wt-row-detail">目标卡 {s.plans} · 公园 {s.parks} · 泳池 {s.pools} · 临时工 {s.temps} · 小区 {s.estates}{s.bis ? ` · bis −${s.bis}` : ""}{s.refusals ? ` · 拒批 −${s.refusals}` : ""}</small>
@@ -829,7 +839,7 @@ function FinalDialog({ game, room, myId, memberId, spectating, onRematch, onLeav
                     <td className="wt-num d" title={s.estateCounts.map((count, i) => (count ? `${i + 1}房×${count}（单价 ${s.estateValues[i]}）` : "")).filter(Boolean).join("，") || "没有完成的小区"}>{s.estates}</td>
                     <td className="wt-num neg d">{s.bis ? `−${s.bis}` : 0}</td>
                     <td className="wt-num neg d">{s.refusals ? `−${s.refusals}` : 0}</td>
-                    <td className="wt-num big">{s.total}</td>
+                    <td className="wt-num big"><b>{s.total}</b></td>
                   </tr>
                 );
               })}
