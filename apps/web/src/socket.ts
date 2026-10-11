@@ -20,3 +20,6 @@ export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = server
 socket.on("session:kicked", () => {
   window.location.assign("/?gate=kicked");
 });
+
+// 开发时给测试脚本用：模拟断线（window.__ntSocket.io.engine.close()）
+if (import.meta.env.DEV) (window as unknown as { __ntSocket: typeof socket }).__ntSocket = socket;

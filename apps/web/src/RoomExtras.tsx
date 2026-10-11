@@ -11,11 +11,11 @@ export function roomRole(room: LobbyRoomSnapshot) {
 /** 这款游戏有没有藏起来的信息（手牌等）；没有的话不显示「观战看手牌」。 */
 const HIDDEN_INFO = false;
 /** 藏起来的是什么（显示在开关上）。 */
-const SECRET = "手牌";
+const SECRET = "这回合交的选择";
 
 const ALL_OPTIONS: { key: keyof RoomAccess; label: string; hint: string }[] = [
   { key: "allowSpectators", label: "允许观战", hint: "有房间码、或者从首页列表都能进来看" },
-  { key: "spectatorsSeeAll", label: `观战看${SECRET}`, hint: `打开后观战的人能看到${SECRET}；关掉只看公开信息` },
+  { key: "spectatorsSeeAll", label: `观战看${SECRET}`, hint: `打开后观战的人能看到${SECRET}（扣下没亮的牌看不到）；只能在开局前打开，牌桌上所有人都看得到这个设置` },
   { key: "open", label: "公开房间", hint: "不认识的人也能从首页列表直接加入空座位" },
 ];
 const OPTIONS = ALL_OPTIONS.filter((option) => HIDDEN_INFO || option.key !== "spectatorsSeeAll");
@@ -32,11 +32,12 @@ export function RoomSettingsPanel({ room }: { room: LobbyRoomSnapshot }) {
 
   return (
     <div className="room-settings">
-      <div className="panel-label">房间设置 <span>{isHost ? "房主随时可以改" : "只有房主能改"}</span></div>
+      <div className="panel-label">房间设置 <span>{!isHost ? "只有房主能改" : room.status === "waiting" ? "房主随时可以改" : `观战看${SECRET}对局中只能关`}</span></div>
       <div className="room-settings-options">
         {OPTIONS.map((option) => {
           const on = room.access[option.key];
-          const off = option.key === "spectatorsSeeAll" && !room.access.allowSpectators;
+          // 「观战看手牌」只能在等候房间打开，对局中只能关（防止边打边开观战窗口看牌）
+          const off = option.key === "spectatorsSeeAll" && (!room.access.allowSpectators || (room.status !== "waiting" && !on));
           return (
             <button
               key={option.key}

@@ -7,6 +7,7 @@
  * - createSceneRoom(game, opts)：包成房间快照（离线、人机、托管、观战、倒计时），直接喂给 GameBoard。
  */
 import { greedySubmission, randomSubmission } from "./baseline.js";
+import { botCommand } from "./bot.js";
 import { PLAN_DEFS, POOL_SLOTS, STREET_LENGTHS, buildDeck } from "./data.js";
 import { apply, createGame, redactGameForSpectator, redactGameForViewer, scoreAll, rankPlayers } from "./engine.js";
 import { createRng, type Rng } from "./rng.js";
@@ -175,21 +176,25 @@ export function buildGame(spec: ExactSpec = {}): GameState {
   return game;
 }
 
-/** 所有人按策略交一回合（默认贪心基线；random 给 rng 就随机）。返回结算后的状态。 */
-export function playRound(state: GameState, rng: Rng, chooser: "greedy" | "random" = "greedy"): GameState {
+export type Chooser = "bot" | "greedy" | "random";
+
+/** 所有人按策略交一回合（默认人机；greedy 贪心基线；random 随机）。返回结算后的状态。 */
+export function playRound(state: GameState, rng: Rng, chooser: Chooser = "bot"): GameState {
   let current = state;
   for (const player of state.players) {
     if (current.phase !== "play" || current.round !== state.round) break;
     const me = current.players.find((candidate) => candidate.id === player.id)!;
     if (me.submitted) continue;
-    const submission = chooser === "greedy" ? greedySubmission(current, player.id) : randomSubmission(current, player.id, rng);
+    const submission = chooser === "bot"
+      ? botCommand(redactGameForViewer(current, player.id), player.id) ?? greedySubmission(current, player.id)
+      : chooser === "greedy" ? greedySubmission(current, player.id) : randomSubmission(current, player.id, rng);
     current = apply(current, player.id, { type: "submit", submission }, rng).state;
   }
   return current;
 }
 
 /** 从 state 起自动打 rounds 回合（到终局就停）。 */
-export function autoPlay(state: GameState, rounds: number, seed = 1, chooser: "greedy" | "random" = "greedy"): GameState {
+export function autoPlay(state: GameState, rounds: number, seed = 1, chooser: Chooser = "bot"): GameState {
   const rng = createRng(seed);
   let current = state;
   for (let i = 0; i < rounds && current.phase === "play"; i += 1) current = playRound(current, rng, chooser);
@@ -197,7 +202,7 @@ export function autoPlay(state: GameState, rounds: number, seed = 1, chooser: "g
 }
 
 /** 自动打到终局。 */
-export function autoPlayToEnd(state: GameState, seed = 1, chooser: "greedy" | "random" = "greedy"): GameState {
+export function autoPlayToEnd(state: GameState, seed = 1, chooser: Chooser = "bot"): GameState {
   return autoPlay(state, 200, seed, chooser);
 }
 

@@ -1,18 +1,18 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import App from "./App.js";
 import { applyTheme, readTheme } from "./theme.js";
 import "./styles.css";
-// 像素风皮肤叠在 styles.css 上面：app-pixel.css 管首页和等候房间，cantstop.css 管牌桌。
-// 白天版由 day-theme.ts 接在它们后面生成，theme-day.css 是手调的部分。
+// 像素风皮肤叠在 styles.css 上面：app-pixel.css 管首页和等候房间，wt-pages.css 管它们的排版，welcometo.css 管牌桌。
 import "./app-pixel.css";
-import "./cantstop.css";
+import "./wt-pages.css";
+import "./welcometo.css";
 import "./theme-day.css";
 
 applyTheme(readTheme());
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
 );

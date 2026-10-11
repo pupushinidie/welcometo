@@ -22,7 +22,10 @@ export function useConfirm(): [(request: ConfirmRequest) => Promise<boolean>, Re
     setPending(null);
   }
 
+  // 外面套一层 display:contents 的 .app-shell：首页、等候房间这些页面把弹窗渲染在 main.app-shell 外面，
+  // app-pixel.css 的 .app-shell .gm-modal-backdrop / .gm-panel 样式要有这个祖先才套得上（首发验收 I11）。
   const dialog = pending && (
+    <div className="app-shell gm-confirm-host" style={{ display: "contents" }}>
     <div
       className="gm-modal-backdrop"
       role="presentation"
@@ -46,6 +49,7 @@ export function useConfirm(): [(request: ConfirmRequest) => Promise<boolean>, Re
           <button type="button" className="quiet-button danger" autoFocus onClick={() => close(true)}>{pending.confirmLabel}</button>
         </div>
       </section>
+    </div>
     </div>
   );
 

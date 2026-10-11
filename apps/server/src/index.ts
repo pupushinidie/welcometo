@@ -939,8 +939,18 @@ io.on("connection", (socket) => {
         return;
       }
       if (seat.connected) {
-        ack({ ok: false, error: "这个昵称的玩家仍在线，无法重新加入。" });
-        return;
+        // 同一次登录（刷新页面、手机断网后旧连接还没超时）：直接顶替旧连接；没有网关时只能等旧连接超时
+        const sameLogin = login !== null && room.seatSessions.get(seat.playerId) === login;
+        if (!sameLogin) {
+          ack({ ok: false, error: "这个昵称的玩家仍在线，无法重新加入。" });
+          return;
+        }
+        const old = io.sockets.sockets.get(seat.id);
+        socketRooms.delete(seat.id);
+        if (old) {
+          void old.leave(code);
+          old.emit("room:closed", { reason: "你在另一个窗口回到了座位。" });
+        }
       }
       clearTimeout(room.abandonTimer);
       delete room.abandonTimer;

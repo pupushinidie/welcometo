@@ -1,12 +1,38 @@
 /*
- * 白天版手调的部分。大部分白天样式由 day-theme.ts 从 app-pixel.css、cantstop.css 换色生成，
+ * 白天版手调的部分。大部分白天样式由 day-theme.ts 从 app-pixel.css、wt-pages.css、welcometo.css 换色生成，
  * 这里只放机械换色不合适的地方；选择器都以 :root[data-theme="day"] 开头。
  */
 :root[data-theme="day"] { color-scheme: light; }
-:root[data-theme="day"] .app-shell * { scrollbar-color: #aebad0 var(--bg); }
+:root[data-theme="day"] .app-shell * { scrollbar-color: #d6c8e2 var(--bg); }
 
-/* 雪山场景里叠着的提示条、横幅还是深底，字和描边用回夜间的颜色 */
-:root[data-theme="day"] .cs-stage { --text: #eef3fb; --muted: #93a3bd; --edge: #04060c; --shade: #080c17; }
-
-/* 登山队里还没占领的路线格：夜间的亮边在白底上看不见，换成灰蓝描边 */
-:root[data-theme="day"] .cs-slot { box-shadow: inset 0 0 0 var(--px) #aebad0; }
+/* 牌桌背景：白天场景上压一层浅色，而不是夜间的深色 */
+:root[data-theme="day"] .wt-screen {
+  --wt-panel: rgba(255, 250, 244, 0.9);
+  --wt-panel-2: rgba(243, 236, 248, 0.94);
+  --wt-line: #e2d4ee;
+  background:
+    linear-gradient(rgba(255, 250, 240, 0.35), rgba(255, 250, 240, 0.5)),
+    var(--scene) center / cover no-repeat,
+    #ffffff;
+}
+:root[data-theme="day"] .wt-top { background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 0 0 #2e1f3a; }
+/* 计分区的空格：夜间是半透明白，白天换成半透明紫 */
+:root[data-theme="day"] .wt-cell:not(.on),
+:root[data-theme="day"] .wt-tick:not(.on),
+:root[data-theme="day"] .wt-estate-col:not(button) { background: rgba(60, 40, 80, 0.06); box-shadow: inset 0 0 0 1px rgba(60, 40, 80, 0.28); }
+:root[data-theme="day"] .wt-cell:not(.on) { color: #6a557a; }
+:root[data-theme="day"] .wt-estate-values i.now { color: #2e1f3a; background: #f6d77c; }
+/* 空地下的空号牌：白天用浅紫框 */
+:root[data-theme="day"] .wt-lot:not(.built) .wt-plate { background: rgba(255, 255, 255, 0.7); box-shadow: 0 0 0 2px rgba(60, 40, 80, 0.3); }
+:root[data-theme="day"] .wt-lot.legal .wt-plate, :root[data-theme="day"] .wt-lot.bis-target .wt-plate { background: #fff1c2; box-shadow: 0 0 0 2px #d9a520; }
+:root[data-theme="day"] .wt-lot.legal .wt-house-pic { outline-color: #d9a520; }
+/* 完成小区的括号字：白天米白底上金色太浅 */
+:root[data-theme="day"] .wt-bracket { color: #94650a; border-top-color: #d9a520; }
+:root[data-theme="day"] .wt-bracket.used { color: #2e1f3a; }
+:root[data-theme="day"] .wt-park small { color: #6a557a; }
+:root[data-theme="day"] .wt-park.bonus small { color: #94650a; }
+:root[data-theme="day"] .wt-park.on small { color: #2e1f3a; }
+/* 首页大图的边框、弹窗背后的格子 */
+:root[data-theme="day"] .wt-hero-art { box-shadow: 0 0 0 var(--px) #2e1f3a, inset 0 0 0 var(--px) #b39cc9; }
+:root[data-theme="day"] .app-shell .gm-modal-backdrop { background: repeating-conic-gradient(rgba(46, 31, 58, 0.55) 0 25%, rgba(46, 31, 58, 0.35) 0 50%) 0 0 / 4px 4px; }
+:root[data-theme="day"] .app-shell .gm-modal-backdrop.wt-backdrop-light { background: repeating-conic-gradient(rgba(46, 31, 58, 0.35) 0 25%, rgba(46, 31, 58, 0.2) 0 50%) 0 0 / 4px 4px; }

@@ -262,6 +262,24 @@ describe("服务器全流程", () => {
     await ok(call<void>((ack) => host.emit("room:dissolve", ack)));
   });
 
+  it("同一次登录刷新页面：旧连接还没断也能直接回到座位（顶替旧连接）；别的登录同名不行", async () => {
+    const host = await h.connect({ "x-gc-session": "S-host" });
+    const names = [nick("房主"), nick("阿花")];
+    const created = await ok(call<LobbyRoomSnapshot>((ack) => host.emit("room:create", { name: names[0]!, capacity: 2 }, ack)));
+    const a = await h.connect({ "x-gc-session": "S-a" });
+    await ok(join(a, { name: names[1]!, code: created.code }));
+    await ok(call<LobbyRoomSnapshot>((ack) => host.emit("room:start", ack)));
+    await updateWhere(h, a, (snapshot) => snapshot.game !== undefined);
+    const stranger = await h.connect({ "x-gc-session": "S-other" });
+    expect((await join(stranger, { name: names[1]!, code: created.code })).ok).toBe(false);
+    const kicked = new Promise<string>((resolve) => a.once("room:closed", ({ reason }) => resolve(reason)));
+    const again = await h.connect({ "x-gc-session": "S-a" });
+    const back = await ok(join(again, { name: names[1]!, code: created.code }));
+    expect(back.members.find((member) => member.id === again.id)).toMatchObject({ playerId: "p2", connected: true });
+    expect(await kicked).toContain("另一个窗口");
+    await ok(call<void>((ack) => host.emit("room:dissolve", ack)));
+  });
+
   it("管理员解散：口令不对拒绝；对了房间关闭，所有人和观战的人都收到通知", async () => {
     const { host, a, b, names } = await threeSeats();
     const viewer = await h.connect();

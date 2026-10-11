@@ -8,10 +8,12 @@ const statusLabels: Record<PublicRoomSummary["status"], string> = {
   finished: "已结束",
 };
 
-function OnlineRooms({ rooms, connected, busy, onJoin }: {
+function OnlineRooms({ rooms, connected, busy, onJoin, confirm }: {
   rooms: PublicRoomSummary[];
   connected: boolean;
   busy: boolean;
+  /** 像素确认框（不用浏览器自带的 confirm）。 */
+  confirm: (request: { title: string; detail: string; confirmLabel: string }) => Promise<boolean>;
   /** 从列表加入空座位（spectate 为 false）或者进去观战。 */
   onJoin: (roomId: string, spectate: boolean) => void;
 }) {
@@ -21,9 +23,9 @@ function OnlineRooms({ rooms, connected, busy, onJoin }: {
   );
   const admin = useAdminToken();
 
-  function dissolve(room: PublicRoomSummary) {
+  async function dissolve(room: PublicRoomSummary) {
     const names = room.players.map((player) => player.name).join("、");
-    if (!window.confirm(`确定解散这个房间吗？（${names}）所有玩家都会被移出。`)) return;
+    if (!(await confirm({ title: "解散这个房间？", detail: `${names}：所有玩家都会被移出。`, confirmLabel: "解散" }))) return;
     admin.setError("");
     socket.emit("admin:dissolve", { roomId: room.id, token: admin.token }, (response) => {
       if (!response.ok) admin.setError(response.error);
@@ -34,7 +36,7 @@ function OnlineRooms({ rooms, connected, busy, onJoin }: {
     <section className="online-rooms" aria-labelledby="online-rooms-title">
       <div className="online-rooms-heading">
         <div>
-          <span className="section-kicker">LIVE TABLES</span>
+          <span className="section-kicker">正在进行</span>
           <h2 id="online-rooms-title">在线牌桌</h2>
         </div>
         <span className="online-rooms-count">
@@ -66,10 +68,10 @@ function OnlineRooms({ rooms, connected, busy, onJoin }: {
                     <span className="online-room-name">{player.name}</span>
                     {player.bot && <small>人机</small>}
                     {player.isHost && room.status === "waiting" && <small>房主</small>}
-                    {player.isActive && <small className="turn">行动中</small>}
+                    {player.isActive && <small className="turn">思考中</small>}
                     {player.isWinner && <small className="winner">胜者</small>}
                     {!player.connected && <small>离线</small>}
-                    {player.score !== undefined && <b>{player.score}<span> 峰</span></b>}
+                    {player.score !== undefined && <b>{player.score}<span> 分</span></b>}
                   </li>
                 ))}
               </ul>
@@ -86,7 +88,7 @@ function OnlineRooms({ rooms, connected, busy, onJoin }: {
                 );
               })()}
               {admin.token && (
-                <button className="admin-dissolve" type="button" onClick={() => dissolve(room)}>解散房间</button>
+                <button className="admin-dissolve" type="button" onClick={() => void dissolve(room)}>解散房间</button>
               )}
             </article>
           ))}

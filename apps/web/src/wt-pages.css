@@ -1,0 +1,191 @@
+/*
+ * 首页和等候房间（欢迎来到的排版；颜色、像素边框沿用 app-pixel.css）。
+ * 桌面三种尺寸一屏放下：在线牌桌、聊天这类可能很长的东西在自己的格子里滚动。
+ */
+.app-shell.wt-page { width: 100%; max-width: none; margin: 0; height: 100vh; min-height: 0; padding: 0 16px 12px; box-sizing: border-box; }
+.app-shell .wt-pagebar { flex: 0 0 auto; height: 56px; gap: 12px; white-space: nowrap; }
+.app-shell .wt-pagebar .topbar-right { gap: 10px; }
+.app-shell .brand { gap: 8px; }
+.wt-brand-icon { image-rendering: pixelated; }
+.app-shell .brand-name { fowt-size: 24px; }
+.app-shell .entry-card-heading { margin-bottom: 8px; }
+.wt-lamp { vertical-align: middle; }
+
+/* ---------- 首页 ---------- */
+.wt-home {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 512px minmax(360px, 440px) minmax(280px, 1fr);
+  grid-template-areas: "hero entry rooms";
+  grid-template-rows: minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+  padding-top: 12px;
+}
+.wt-home-hero { grid-area: hero; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.wt-entry { grid-area: entry; align-self: center; }
+.wt-home-hero { align-self: center; }
+.wt-home-rooms { grid-area: rooms; min-height: 0; overflow-y: auto; }
+.wt-hero-art {
+  position: relative;
+  width: 512px;
+  height: 288px;
+  flex: 0 0 auto;
+  background: var(--hero-img) center / 512px 288px no-repeat, #2c2140;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0 var(--px) var(--edge), inset 0 0 0 var(--px) #8a6fb0;
+}
+.app-shell .wt-hero-art h1 {
+  position: absolute;
+  left: 16px;
+  bottom: 12px;
+  margin: 0;
+  color: var(--gold);
+  fowt-size: 48px;
+  fowt-weight: 400;
+  line-height: 1;
+  text-shadow: 4px 4px 0 var(--edge), -2px -2px 0 var(--edge), 2px -2px 0 var(--edge), -2px 2px 0 var(--edge);
+}
+.wt-lead { margin: 0; color: var(--text); fowt-size: 12px; line-height: 2; }
+.wt-lead b { color: var(--gold); fowt-weight: 400; }
+.wt-home-facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.wt-home-facts span { padding: 2px 8px; color: var(--muted); background: var(--panel-2); fowt-size: 12px; }
+.wt-kinds { display: flex; flex-wrap: wrap; gap: 8px; }
+.wt-kinds figure { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0; }
+.wt-kinds figcaption { display: flex; align-items: center; gap: 2px; color: var(--text); fowt-size: 12px; }
+.wt-kinds img, .wt-kinds .wt-card { image-rendering: pixelated; }
+.wt-card { display: inline-block; background-repeat: no-repeat; }
+.app-shell .wt-entry { padding: 16px 20px; }
+.app-shell .wt-entry .entry-form { margin-top: 12px; }
+.app-shell .wt-entry .field-label-spaced { margin-top: 12px; }
+.app-shell .wt-entry h2 { margin: 0; }
+.wt-capacity { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
+.app-shell .wt-capacity .capacity-option { height: 40px; padding: 0; }
+.app-shell .wt-capacity .capacity-option strong { fowt-size: 24px; }
+.app-shell .wt-entry-submit { width: 100%; margin-top: 14px; fowt-size: 24px; }
+.app-shell .wt-home-rooms .online-rooms { margin: 0; padding: 0; border-top: 0; }
+.app-shell .wt-home-rooms .online-rooms-heading { margin-bottom: 10px; }
+.app-shell .wt-home-rooms .online-rooms-heading h2 { margin: 2px 0 0; }
+.app-shell .wt-home-rooms .online-rooms-grid { grid-template-columns: 1fr; gap: 10px; }
+
+/* 开房选项 */
+.wt-options { display: grid; gap: 8px; }
+.wt-option { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+.wt-option-name { flex: 0 0 60px; color: var(--muted); fowt-size: 12px; }
+.wt-option-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.wt-stepper { display: flex; align-items: center; gap: 6px; }
+.app-shell .wt-stepper .quiet-button { width: 32px; height: 32px; padding: 0; fowt-size: 24px; line-height: 1; }
+.app-shell .wt-stepper .text-input { width: 64px; height: 32px; padding: 0 6px; fowt-size: 24px; text-align: center; -moz-appearance: textfield; }
+.wt-stepper input::-webkit-outer-spin-button, .wt-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ---------- 等候房间 ---------- */
+.wt-room {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(400px, 640px) minmax(250px, 1fr);
+  gap: 16px;
+  min-height: 0;
+  padding-top: 12px;
+}
+.wt-room-info, .wt-room-side { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.app-shell .wt-room .room-panel { padding: 14px 16px; }
+.wt-code-panel { display: flex; flex-direction: column; gap: 4px; }
+.app-shell .wt-code-panel .room-code-display { margin-top: 4px; }
+.wt-room-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.wt-options-panel { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; }
+.app-shell .wt-options-panel .room-settings { margin-top: 4px; }
+.wt-room-players { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.app-shell .wt-room-players .panel-topline { display: flex; align-items: center; justify-content: space-between; }
+.wt-seat-grid { display: grid; grid-template-columns: 1fr; gap: 6px; min-height: 0; overflow-y: auto; padding: 2px; }
+.wt-seat-grid.two { grid-template-columns: 1fr 1fr; }
+.wt-room-seat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 6px 8px;
+  background: var(--panel-2);
+  box-shadow: 0 0 0 var(--px) var(--edge), inset calc(var(--px) * 3) 0 0 0 var(--seat, #4a3864);
+}
+.wt-room-seat.open { background: transparent; box-shadow: 0 0 0 var(--px) #4a3864; }
+.wt-room-seat-name { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.wt-room-seat-name strong { overflow: hidden; color: var(--text); fowt-size: 24px; line-height: 28px; fowt-weight: 400; white-space: nowrap; text-overflow: ellipsis; }
+.wt-room-seat-name > span { display: flex; flex-wrap: wrap; gap: 4px; color: var(--muted); fowt-size: 12px; }
+.wt-room-seat .empty-avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 auto; }
+.wt-room-seat .kick-button, .wt-room-seat .add-bot-button { flex: 0 0 auto; margin-left: auto; }
+.wt-mini-avatar { display: inline-block; flex: 0 0 auto; width: 32px; height: 32px; box-shadow: 0 0 0 var(--px) var(--seat); }
+.wt-mini-avatar img { display: block; image-rendering: pixelated; }
+.wt-tag { padding: 0 4px; fowt-style: normal; fowt-size: 12px; line-height: 16px; color: #fff3ea; background: #4a3864; }
+.wt-tag.bot { color: #d8e8ff; background: #2a62c0; }
+.wt-tag.you { color: #2a1c06; background: #f6d77c; }
+.wt-tag.warn { color: #ffd8d0; background: #6e1020; }
+.wt-start { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+.app-shell .wt-start-button { width: 100%; margin-top: 0; min-height: 52px; fowt-size: 24px; }
+.wt-room-kinds { flex: 0 0 auto; }
+.wt-room-kinds .wt-kinds { margin-top: 8px; }
+.wt-room-chat { flex: 1; min-height: 0; display: flex; }
+.app-shell .wt-room-chat .room-chat.light { display: flex; flex-direction: column; flex: 1; min-height: 0; margin: 0; padding: 10px 12px; }
+.app-shell .wt-room-chat .room-chat-heading span { display: none; }
+.app-shell .wt-room-chat .room-chat-list { flex: 1; height: auto; min-height: 60px; }
+.app-shell .wt-room .feedback { margin: 0; }
+
+/* ---------- 大屏：首页大图放到 2× ---------- */
+@media (min-width: 1800px) and (min-height: 900px) {
+  .wt-home { grid-template-columns: 1024px minmax(360px, 440px) minmax(280px, 1fr); }
+  .wt-hero-art { width: 1024px; height: 576px; background-size: 1024px 576px; }
+  .app-shell .wt-hero-art h1 { fowt-size: 72px; left: 24px; bottom: 20px; }
+  .wt-lead { fowt-size: 24px; line-height: 1.6; }
+  .wt-room { grid-template-columns: minmax(320px, 420px) minmax(480px, 760px) minmax(300px, 1fr); }
+  .wt-room-seat { min-height: 56px; }
+}
+
+/* ---------- 中等宽度：首页两列，在线牌桌放到大图下面 ---------- */
+@media (max-width: 1279px) and (min-width: 700px) {
+  .wt-home { grid-template-columns: 512px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "hero entry" "rooms entry"; }
+  .wt-home-hero .wt-kinds { display: none; }
+  .wt-room { grid-template-columns: minmax(250px, 290px) minmax(0, 1fr) minmax(220px, 260px); gap: 12px; }
+  .wt-room-kinds { display: none; }
+}
+@media (max-height: 760px) and (min-width: 700px) {
+  .wt-home-hero .wt-kinds { display: none; }
+}
+
+/* ---------- 手机：一列，第一屏是标题和进入牌桌 ---------- */
+@media (max-width: 699px) {
+  .app-shell.wt-page { height: auto; min-height: 100vh; padding: 0 10px 16px; }
+  .app-shell .wt-pagebar { height: 48px; }
+  .app-shell .wt-pagebar .center-link { display: none; }
+  .app-shell .wt-pagebar .connection-status { display: none; }
+  .app-shell .brand-name { fowt-size: 12px; }
+  .wt-home, .wt-room { display: flex; flex-direction: column; height: auto; gap: 12px; padding-top: 8px; }
+  .wt-hero-art { width: 100%; height: 120px; background-size: 512px 288px; background-position: center 70%; }
+  .app-shell .wt-hero-art h1 { fowt-size: 36px; left: 10px; bottom: 8px; }
+  .wt-home-hero { gap: 8px; }
+  .wt-home-hero .wt-kinds, .wt-home-facts { display: none; }
+  .wt-home-hero { display: contents; }
+  .wt-hero-art { order: 1; }
+  .wt-entry { order: 2; }
+  .wt-lead { order: 3; }
+  .app-shell .wt-entry .entry-card-heading { display: none; }
+  .app-shell .wt-entry { padding: 12px 14px; }
+  .app-shell .wt-entry .entry-form { margin-top: 8px; }
+  .wt-home-rooms { order: 3; overflow: visible; }
+  .wt-capacity { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .wt-room-info { display: contents; }
+  .wt-code-panel { order: 1; }
+  .wt-room-players { order: 2; }
+  .wt-options-panel { order: 3; overflow: visible; }
+  .wt-room-side { order: 4; }
+  .wt-seat-grid { overflow: visible; }
+  .wt-seat-grid.two { grid-template-columns: 1fr 1fr; }
+  .wt-room-seat { min-height: 44px; padding: 4px 6px; gap: 6px; }
+  .wt-room-seat .add-bot-button { padding: 2px 6px; }
+  .wt-room-chat { min-height: 300px; }
+  .wt-room-kinds .wt-kinds { gap: 4px; }
+}
+.wt-room-seat.open .wt-room-seat-name strong { color: var(--muted); fowt-size: 12px; line-height: 16px; }
+/* 中等宽度和手机：两列座位里名字放不下 24px，用 12px（不截断「咕噜一号」） */
+@media (max-width: 1279px) {
+  .wt-room-seat-name strong { fowt-size: 12px; line-height: 16px; }
+}
+.app-shell .wt-pagebar .gm-modal-backdrop { white-space: normal; }
