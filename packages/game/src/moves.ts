@@ -1,10 +1,8 @@
 /**
  * 枚举合法的一手（人机、基线、随机对局测试用）。
  */
-
 import {
   applyMove,
-
   canImprove,
   canPark,
   canUseBis,

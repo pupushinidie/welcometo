@@ -367,3 +367,15 @@ export function compareScores(a: ScoreBreakdown, b: ScoreBreakdown): number {
   }
   return 0;
 }
+
+/** 一手（或拒批 = null）写到表上之后的样子，不含目标卡。不合法就抛出。 */
+export function sheetAfter(sheet: Sheet, move: Move | null, combos: readonly Combo[], round: number): Sheet {
+  if (!move) {
+    const next = cloneSheet(sheet);
+    next.refusals += 1;
+    return next;
+  }
+  const combo = combos[move.combo];
+  if (!combo) throw new Error("没有这一组。");
+  return applyMove(sheet, move, combo, round).sheet;
+}

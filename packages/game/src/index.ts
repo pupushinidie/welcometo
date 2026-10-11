@@ -46,3 +46,23 @@ export type {
   VoiceSignal,
 } from "./roomTypes.js";
 export { actionVariants, claimablePlans, legalMoves, placements } from "./moves.js";
+export { greedySubmission, idealIndex, randomSubmission } from "./baseline.js";
+export {
+  ALL_PLAN_IDS,
+  autoPlay,
+  autoPlayToEnd,
+  buildGame,
+  createScene,
+  createSceneRoom,
+  finishScene,
+  parseSheet,
+  parseStreet,
+  playRound,
+  SCENE_DESCRIPTIONS,
+  SCENE_NAMES,
+  SCENE_PLAYER_NAMES,
+  sheetToText,
+  withSubmitted,
+} from "./scenes.js";
+export type { ExactSpec, PlayerSpec, SceneName, SceneOptions, SceneRoomOptions, SheetSpec } from "./scenes.js";
+export { sheetProblems, stateProblems } from "./validate.js";
