@@ -471,6 +471,10 @@ button.wt-combo:hover:not(:disabled) { background: rgba(246, 215, 124, 0.12); }
 
 /* ---------- 菜单（手机） ---------- */
 .wt-menu-button { margin-left: auto; }
+/* 手机顶栏：♪ 在「菜单」左边一直显示，菜单里就不再放一个 */
+.wt-sound-button { flex: 0 0 auto; margin-left: auto; }
+.wt-sound-button + .wt-menu-button { margin-left: 6px; }
+.wt-menu .gm-music-toggle { display: none; }
 .wt-menu {
   position: absolute;
   z-index: 40;

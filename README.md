@@ -113,3 +113,9 @@ BASE_PATH=/welcometo/ npm run build
 ## 画面：白天版和夜间版
 
 只有像素风一种画面，配色分夜间（深色，默认）和白天（白底）。白天版由 `apps/web/day-theme.ts` 按 `day-palette.ts` 从夜间样式生成，手调的写在 `src/theme-day.css`；选择记在 `gm-pixel-theme`，全站共用。
+
+## 声音
+
+还没有背景音乐（`App.tsx` 用 `NO_BGM`：进了房间和教程里顶栏照样有 ♪ 面板，能调音效和语音）。声音的共用部分是 `apps/web/src/gm-sound.tsx`（各仓库同一份，别单独改）；手机牌桌的 ♪ 放在顶栏「菜单」左边一直显示。
+
+**动作音效**（2026-10-11）：都在 `apps/web/src/game-sfx.ts`，按每一步的 `game.events` 出声；自己的动作响亮，别人的减半，观战都算别人的；刚进房间 / 重连不出声。挑一组、选栅栏位 / 改造列、勾选项响 select，在空地上写门牌号（草稿）响铅笔 write，点写不进去的空地响 deny；确认提交是盖章声，撤回是橡皮擦，别人交了只响一下轻的。结算时按自己这一手用的行动出声：栅栏是铅笔沿尺子画线、公园树叶沙沙、泳池扑通一声带水泡（这三个是招牌声）、临时工盖章、改造 coin、bis 写两遍；别人这回合的落笔合成一声。完成规划目标 score（首批完成 sparkle），拒批 bust，重洗 shuffle，新回合翻 3 组 deal + 轮到你，最后 5 秒滴答，超时 timeout，终局 reveal → 赢 / 输。自测：`node ~/projects/qa-reports/tools/welcometo-sfx.mjs`，教程：`URL=http://localhost:5298/ node ~/projects/qa-reports/tools/sfx-tut.mjs`。

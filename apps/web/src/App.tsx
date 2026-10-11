@@ -19,7 +19,7 @@ import { roomRole, RoomSettingsPanel, SeatSwitch } from "./RoomExtras.js";
 import { forgetSeat, readName, readSeat, rememberName, rememberSeat, retryable } from "./seat.js";
 import { socket } from "./socket.js";
 import { ThemeToggle, useTheme, type Theme } from "./theme.js";
-import { NO_BGM, SoundToggle, useBgm } from "./gm-sound.js";
+import { NO_BGM, sfx, SoundToggle, useBgm, useRoomSfx } from "./gm-sound.js";
 import { TutorialInvite } from "./tutorial/Invite.js";
 import { readTutorial } from "./tutorial/storage.js";
 import { GAME_ID } from "./tutorial/tutorialGame.js";
@@ -68,6 +68,17 @@ function App() {
   const [tutorialOpen, setTutorialOpen] = useState(() => new URLSearchParams(window.location.search).has("tutorial"));
   // 声音：进了房间（等候房间、对局、观战）和新手教程里顶栏有 ♪ 面板（音效、语音音量）；这款还没有背景音乐。
   useBgm(room || tutorialOpen ? NO_BGM : null);
+  // 房间里的提示音：有人进出、开局、收到别人的聊天
+  // （聊天只留最近 100 条，条数会停在 100：按最后一条的 id 变了几次来数）
+  const lastChat = room?.chat[room.chat.length - 1];
+  const chatTick = useRef({ id: "", count: 0 });
+  if (lastChat && lastChat.id !== chatTick.current.id) chatTick.current = { id: lastChat.id, count: chatTick.current.count + 1 };
+  useRoomSfx(room ? {
+    members: room.members.length,
+    playing: room.status === "playing",
+    chatCount: chatTick.current.count,
+    lastChatMine: lastChat?.senderId === socket.id,
+  } : null);
   function closeTutorial() {
     setTutorialOpen(false);
     const params = new URLSearchParams(window.location.search);
@@ -133,7 +144,10 @@ function App() {
     };
     const handleDisconnect = () => setConnected(false);
     const handleRoomUpdate = (snapshot: LobbyRoomSnapshot) => setRoom((current) => (isStale(snapshot, current) ? current : snapshot));
-    const handleRoomError = (message: string) => setError(message);
+    const handleRoomError = (message: string) => {
+      sfx.error();
+      setError(message);
+    };
     const handleLobbyUpdate = (rooms: PublicRoomSummary[]) => setLobbyRooms(rooms);
     const handleRoomClosed = ({ reason }: { reason: string }) => {
       forgetSeat();

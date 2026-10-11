@@ -43,6 +43,8 @@ import { socket } from "./socket.js";
 import { TipToast } from "./tutorial/Coach.js";
 import { useFirstTimeTips } from "./tutorial/tips.js";
 import { detectTips, GAME_ID, TIPS } from "./tutorial/tutorialGame.js";
+import { SoundToggle, useSfxCountdown } from "./gm-sound.js";
+import { pick, useGameSfx } from "./game-sfx.js";
 
 export interface GameBoardProps {
   readonly room: LobbyRoomSnapshot;
@@ -175,6 +177,8 @@ function GameBoard(props: GameBoardProps) {
   const me = game.players.find((player) => player.id === myId) ?? game.players[0]!;
   const autoPlaying = member?.auto === true;
   const secondsLeft = useCountdown(room);
+  // 音效：每一步动作对应的声音（观战都算别人的）
+  useGameSfx(game, spectating ? "" : myId, autoPlaying);
   const scores = useMemo(() => scoreAll(game), [game]);
   const [viewId, setViewId] = useState<string | null>(null);
   const viewed = game.players.find((player) => player.id === viewId) ?? me;
@@ -227,6 +231,8 @@ function GameBoard(props: GameBoardProps) {
 
   const playing = game.phase === "play";
   const canAct = playing && !spectating && !autoPlaying && !me.submitted && !viewingOther;
+  // 还没交的人最后 5 秒滴答（大家同时选，看别人的表时也算）
+  useSfxCountdown(playing && !spectating && !autoPlaying && !me.submitted, secondsLeft);
   const sheet = me.sheet;
   const refuse = playing && mustRefuse(sheet, game.combos);
 
@@ -279,6 +285,7 @@ function GameBoard(props: GameBoardProps) {
   function pickCombo(index: number) {
     if (!canAct || !allow(`combo:${index}`)) return;
     if (draft.combo === index) return;
+    pick.select(true);
     const picked = game.combos[index]!;
     let temp: number | null = null;
     // 临时工组：原号码没地方放时，先帮他挑一个能放的调整（离原号码最近的），他还可以再换
@@ -292,11 +299,13 @@ function GameBoard(props: GameBoardProps) {
   }
   function pickSpot(street: number, house: number) {
     if (!canAct || !allow(`house:${street}:${house}`)) return;
+    pick.write();
     update({ spot: { street, house }, fence: null, improve: null, bis: null, skipPlans: [] });
   }
   function pickFence(street: number, pos: number) {
     if (!canAct || !allow(`fence:${street}:${pos}`)) return;
     const same = draft.fence?.street === street && draft.fence.pos === pos;
+    pick.select(!same);
     update({ fence: same ? null : { street, pos } });
   }
   function pickBis(street: number, house: number) {
@@ -304,13 +313,17 @@ function GameBoard(props: GameBoardProps) {
     const options = bisList.filter((b) => b.street === street && b.house === house);
     if (draft.bis && draft.bis.street === street && draft.bis.house === house) {
       const other = options.find((b) => b.from !== draft.bis!.from);
+      if (other) pick.write();
+      else pick.select(false);
       update({ bis: other ?? null });
       return;
     }
+    if (options[0]) pick.write();
     update({ bis: options[0] ?? null });
   }
   function pickImprove(size: number) {
     if (!canAct || !allow(`improve:${size}`)) return;
+    pick.select(draft.improve !== size);
     update({ improve: draft.improve === size ? null : size });
   }
   function reset() {
@@ -409,7 +422,7 @@ function GameBoard(props: GameBoardProps) {
       const street = draft.spot.street;
       const next = PARK_TRACKS[street]![placed.parks[street]! + 1]!;
       return (
-        <label className="wt-check" data-tutorial="action-toggle">
+        <label className="wt-check" data-tutorial="action-toggle" data-sfx="select">
           <input type="checkbox" checked={draft.park} onChange={(event) => allow("toggle:park") && update({ park: event.target.checked })} />
           在{STREET_NAMES[street]}建一个公园（公园到 {next} 分）
         </label>
@@ -417,7 +430,7 @@ function GameBoard(props: GameBoardProps) {
     }
     if (combo.action === "pool" && isPoolSlot(draft.spot.street, draft.spot.house)) {
       return (
-        <label className="wt-check" data-tutorial="action-toggle">
+        <label className="wt-check" data-tutorial="action-toggle" data-sfx="select">
           <input type="checkbox" checked={draft.pool} onChange={(event) => allow("toggle:pool") && update({ pool: event.target.checked })} />
           建泳池（泳池到 {POOL_TRACK[placed.poolTrack + 1]} 分）
         </label>
@@ -434,14 +447,14 @@ function GameBoard(props: GameBoardProps) {
           const plan = game.plans[index]!;
           const value = plan.approvedRound === null ? plan.high : plan.low;
           return (
-            <label className="wt-check" key={index}>
+            <label className="wt-check" key={index} data-sfx="select">
               <input type="checkbox" checked={!draft.skipPlans.includes(index)} onChange={(event) => allow(`plan:${index}`) && update({ skipPlans: event.target.checked ? draft.skipPlans.filter((p) => p !== index) : [...draft.skipPlans, index] })} />
               验证目标卡 n°{index + 1}（+{value} 分{plan.approvedRound === null ? "，首批" : ""}）
             </label>
           );
         })}
         {firstAvailable && (
-          <label className="wt-check small" data-tutorial="reshuffle">
+          <label className="wt-check small" data-tutorial="reshuffle" data-sfx="select">
             <input type="checkbox" checked={draft.reshuffle} onChange={(event) => allow("reshuffle") && update({ reshuffle: event.target.checked })} />
             如果我首个完成目标卡，就把牌全部重洗
           </label>
@@ -511,7 +524,7 @@ function GameBoard(props: GameBoardProps) {
                     const value = combo!.num + delta;
                     if (value < 0 || value > 17) return null;
                     return (
-                      <button key={delta} type="button" className={`quiet-button${draft.temp === delta ? " on" : ""}`} data-temp={delta} data-tutorial={`temp:${delta}`}
+                      <button key={delta} type="button" className={`quiet-button${draft.temp === delta ? " on" : ""}`} data-sfx="select" data-temp={delta} data-tutorial={`temp:${delta}`}
                         onClick={() => allow(`temp:${delta}`) && update({ temp: draft.temp === delta ? null : delta, spot: null, skipPlans: [] })} aria-pressed={draft.temp === delta}>
                         {value}
                       </button>
@@ -569,7 +582,7 @@ function GameBoard(props: GameBoardProps) {
   }
   const targets: SheetTargets = canAct
     ? {
-        ...(legalSpots ? { houses: legalSpots, onHouse: pickSpot, housesQuiet: !!draft.spot } : {}),
+        ...(legalSpots ? { houses: legalSpots, onHouse: pickSpot, housesQuiet: !!draft.spot, ...(canAct ? { onDeny: pick.deny } : {}) } : {}),
         ...(fenceTargets ? { fences: fenceTargets, onFence: pickFence } : {}),
         ...(bisTargets ? { bis: bisTargets, onBis: pickBis } : {}),
       }
@@ -695,6 +708,8 @@ function GameBoard(props: GameBoardProps) {
             <strong className="wt-prompt" role="status">{prompt}</strong>
             {timer}
           </div>
+          {/* ♪ 放在顶栏菜单旁边，随时点得到（菜单里那个手机上藏掉，见 welcometo.css） */}
+          <SoundToggle className="quiet-button wt-sound-button" />
           <button className="quiet-button wt-menu-button" type="button" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>菜单</button>
           {menuOpen && (
             <div className="wt-menu" role="dialog" aria-label="菜单">

@@ -34,6 +34,7 @@ import {
   type TutorialStep,
 } from "@welcometo/game";
 import GameBoard, { EMPTY_DRAFT, type Draft } from "../GameBoard.js";
+import { pick } from "../game-sfx.js";
 import { Coach, isTouchDevice, StepPips, type CoachView } from "./Coach.js";
 import { writeTutorial } from "./storage.js";
 import { GAME_ID } from "./tutorialGame.js";
@@ -116,6 +117,10 @@ export default function TutorialMode({ name, brand, themeToggle, theme, waitingR
     watchDelay: () => 900,
   });
   const { game, step, index, practice, flash } = tutorial;
+  // 剧本里点了别的：咕噜嘎提醒的同时响一声「不行」
+  useEffect(() => {
+    if (flash) pick.deny();
+  }, [flash]);
 
   // 走到最后一步就算学完（之后首页不再邀请）
   useEffect(() => {
@@ -149,6 +154,7 @@ export default function TutorialMode({ name, brand, themeToggle, theme, waitingR
     // 已经点对的那一组再点一次不算错
     if (expect && stage && what === `combo:${expect.combo}`) return true;
     setWrong(WRONG_STEP);
+    pick.deny();
     return false;
   };
 

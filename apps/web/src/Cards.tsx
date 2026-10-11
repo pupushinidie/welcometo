@@ -42,7 +42,7 @@ export function ComboCard({ combo, index, scale, selected, unusable, shownNum, p
   const cls = `wt-combo cs${scale}${selected ? " selected" : ""}${unusable ? " unusable" : ""}`;
   if (!onClick) return <div className={cls} style={style} data-combo={index} data-tutorial={`combo-${index + 1}`}>{body}</div>;
   return (
-    <button type="button" className={cls} style={style} onClick={onClick} disabled={disabled} aria-pressed={selected} data-combo={index} data-tutorial={`combo-${index + 1}`}
+    <button type="button" className={cls} style={style} onClick={onClick} disabled={disabled} aria-pressed={selected} data-sfx="none" data-combo={index} data-tutorial={`combo-${index + 1}`}
       aria-label={`第 ${index + 1} 组：${combo.num} · ${ACTION_NAMES[combo.action]}${unusable ? "（放不下）" : ""}`}>
       {body}
     </button>

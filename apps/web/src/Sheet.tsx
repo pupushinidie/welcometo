@@ -28,6 +28,8 @@ export interface SheetTargets {
   /** 能 bis 的空位 "s:h"。 */
   readonly bis?: ReadonlySet<string>;
   readonly onBis?: (street: number, house: number) => void;
+  /** 点了变暗的空地（这个号码写不进去）：响一声「不行」。 */
+  readonly onDeny?: () => void;
 }
 
 const STREET_NAMES = ["第 1 条街", "第 2 条街", "第 3 条街"];
@@ -96,11 +98,11 @@ const onClick = bisTarget ? () => targets.onBis?.(street, index) : legal ? () =>
                   </>
                 );
                 return clickable ? (
-                  <button key={index} type="button" className={cls} onClick={onClick} data-house={key} data-tutorial={`house:${key}`} aria-label={`${STREET_NAMES[street]}第 ${index + 1} 格${house ? `：${house.num}` : ""}`}>
+                  <button key={index} type="button" className={cls} onClick={onClick} data-sfx="none" data-house={key} data-tutorial={`house:${key}`} aria-label={`${STREET_NAMES[street]}第 ${index + 1} 格${house ? `：${house.num}` : ""}`}>
                     {content}
                   </button>
                 ) : (
-                  <div key={index} className={cls} data-house={key} data-tutorial={`house:${key}`}>
+                  <div key={index} className={cls} data-house={key} data-tutorial={`house:${key}`} onClick={dim ? targets.onDeny : undefined}>
                     {content}
                   </div>
                 );
@@ -116,7 +118,7 @@ const onClick = bisTarget ? () => targets.onBis?.(street, index) : legal ? () =>
                 const style = { left: `${left}px` } as CSSProperties;
                 if (can) {
                   return (
-                    <button key={pos} type="button" className="wt-fence-slot can" style={style} onClick={() => targets.onFence?.(street, pos)} aria-label={`在${STREET_NAMES[street]}第 ${pos + 1}、${pos + 2} 格之间画栅栏`} data-fence={key} data-tutorial={`fence:${key}`}>
+                    <button key={pos} type="button" className="wt-fence-slot can" style={style} data-sfx="none" onClick={() => targets.onFence?.(street, pos)} aria-label={`在${STREET_NAMES[street]}第 ${pos + 1}、${pos + 2} 格之间画栅栏`} data-fence={key} data-tutorial={`fence:${key}`}>
                       <i />
                     </button>
                   );
