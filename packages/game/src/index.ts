@@ -66,3 +66,4 @@ export {
 } from "./scenes.js";
 export type { ExactSpec, PlayerSpec, SceneName, SceneOptions, SceneRoomOptions, SheetSpec } from "./scenes.js";
 export { sheetProblems, stateProblems } from "./validate.js";
+export { botCommand } from "./bot.js";

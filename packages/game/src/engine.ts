@@ -507,10 +507,12 @@ export function redactGameForViewer(state: GameState, viewerId: string): GameSta
   return view;
 }
 
-/** 观战：seeAll（房主允许观战看全部）时能看到每个人这回合交了什么；牌堆顺序始终看不到。 */
-export function redactGameForSpectator(state: GameState, seeAll: boolean): GameState {
-  if (!seeAll) return redactGameForViewer(state, "");
-  return stripServerOnly(state);
+/**
+ * 观战：本游戏所有人的表本来就公开，唯一藏起来的是「这回合交了什么」（结算前）和牌堆顺序。
+ * 即使房主打开「观战看全部」，交了什么也不给观战的人看（免得场外报给还没交的人），所以和默认一样。
+ */
+export function redactGameForSpectator(state: GameState, _seeAll: boolean): GameState {
+  return redactGameForViewer(state, "");
 }
 
 // ───────────────────────── 开局 ─────────────────────────

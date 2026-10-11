@@ -2,7 +2,8 @@ import { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { io as createClient, type Socket } from "socket.io-client";
 import {
-  legalActions,
+  fallbackSubmission,
+  waitingFor,
   type AckResponse,
   type Capacity,
   type ClientToServerEvents,
@@ -14,16 +15,34 @@ import {
 } from "@welcometo/game";
 
 // ---------- 每款游戏不一样的地方 ----------
-/** 测试里真人怎么走：从合法动作里挑一个（要保证对局能走完）。欲罢不能：推进完就收手，回合短。 */
-function humanMove(game: GameState, actions: GameCommand[]): GameCommand {
-  return game.stage === "decide" ? { type: "STOP" } : actions[0]!;
+/** 测试里真人怎么走：从合法动作里挑一个（要保证对局能走完）。欢迎来到：交兜底的一手（最小的数字填最左能填的位置，不能填就拒批），不撤回。 */
+function humanMove(_game: GameState, actions: GameCommand[]): GameCommand {
+  return actions.find((action) => action.type === "submit")!;
 }
-/** 这位玩家自己做了点什么（不是超时、不是轮到他）。 */
+/** 这位玩家现在能做的动作（没交就交兜底的一手）。 */
+function legalActions(game: GameState, playerId: string): GameCommand[] {
+  const me = game.players.find((player) => player.id === playerId);
+  if (!me || me.submitted || game.phase !== "play") return [];
+  return [{ type: "submit", submission: fallbackSubmission(game, playerId) }];
+}
+/** 现在要不要这位真人做决定（同时交：没交的人都要做；交了的不再动，免得来回改交）。 */
+function needsMe(game: GameState, playerId: string): boolean {
+  return waitingFor(game).includes(playerId);
+}
+/** 这位玩家自己（或替他的人机）做了点什么，不是超时代做的。 */
 function actedBy(room: LobbyRoomSnapshot, playerId: string): boolean {
-  return room.game?.events.some((event) => {
-    const type: string = event.type;
-    return "player" in event && event.player === playerId && type !== "TurnTimedOut" && type !== "TurnStarted";
-  }) === true;
+  const events = room.game?.events ?? [];
+  const acted = events.some((event) => event.type === "Submitted" && event.player === playerId);
+  const timedOut = events.some((event) => event.type === "TimedOut" && event.players.includes(playerId));
+  return acted && !timedOut;
+}
+/** 这一步里这位玩家是被超时代做的。 */
+function timedOut(room: LobbyRoomSnapshot, playerId: string): boolean {
+  return room.game?.events.some((event) => event.type === "TimedOut" && event.players.includes(playerId)) === true;
+}
+/** 对局结束。 */
+function finished(game: GameState | undefined): boolean {
+  return game?.phase === "gameOver";
 }
 /** 最小的房间人数选项、开局至少几人。 */
 const MIN_CAPACITY: Capacity = 2;
@@ -114,7 +133,7 @@ function autoplay(client: TestSocket): () => void {
   let sentFor = "";
   const handler = (room: LobbyRoomSnapshot) => {
     const game = room.game;
-    if (!game || game.phase === "finished") return;
+    if (!game || finished(game) || !needsMe(game, seatOf(client))) return;
     const actions = legalActions(game, seatOf(client));
     const key = String(game.version);
     if (actions.length === 0 || sentFor === key) return;
@@ -165,6 +184,21 @@ describe("人机", () => {
     await updateWhere(host, (snapshot) => snapshot.members.length === 2 && !snapshot.members.some((member) => member.bot));
   });
 
+  it("6 人房一个人加满 5 个人机：名字排到咕噜五号，再加就满了；开局后人机真的在交", async () => {
+    const host = await connect();
+    await create(host, nick("六人"), 6);
+    for (let seat = 1; seat < 6; seat += 1) expect((await addBot(host)).ok).toBe(true);
+    expect((await addBot(host)).ok).toBe(false);
+    const room = await updateWhere(host, (snapshot) => snapshot.members.length === 6);
+    expect(room.members.slice(1).map((member) => member.name)).toEqual(["咕噜一号", "咕噜二号", "咕噜三号", "咕噜四号", "咕噜五号"]);
+    expect(room.members.slice(1).every((member) => member.bot === true)).toBe(true);
+    expect((await start(host)).ok).toBe(true);
+    // 真人不动：5 个人机都交了，只等我一个
+    const waiting = await updateWhere(host, (snapshot) => snapshot.game?.phase === "play" && snapshot.game.players.filter((player) => player.submitted).length === 5);
+    expect(waiting.game!.players.find((player) => !player.submitted)!.id).toBe(seatOf(host));
+    expect((await call<void>((ack) => host.emit("room:dissolve", ack))).ok).toBe(true);
+  }, 30_000);
+
   it("一个人加满人机就能开局，人机把整局打完；人机自动同意再来一局", async () => {
     const host = await connect();
     await create(host, nick("独行"), SOLO_CAPACITY);
@@ -174,13 +208,13 @@ describe("人机", () => {
 
     expect((await start(host)).ok).toBe(true);
     const stop = autoplay(host);
-    const finished = await updateWhere(host, (snapshot) => snapshot.game?.phase === "finished", 60_000);
+    const over = await updateWhere(host, (snapshot) => finished(snapshot.game), 60_000);
     stop();
-    const bots = finished.members.filter((member) => member.bot).map((member) => member.id);
-    expect(finished.rematch?.acceptedIds.sort()).toEqual(bots.sort());
+    const bots = over.members.filter((member) => member.bot).map((member) => member.id);
+    expect(over.rematch?.acceptedIds.sort()).toEqual(bots.sort());
 
     expect((await call<void>((ack) => host.emit("room:rematch", true, ack))).ok).toBe(true);
-    const again = await updateWhere(host, (snapshot) => snapshot.game !== undefined && snapshot.game.phase !== "finished" && !snapshot.rematch);
+    const again = await updateWhere(host, (snapshot) => snapshot.game !== undefined && !finished(snapshot.game) && !snapshot.rematch);
     expect(again.game!.players).toHaveLength(SOLO_CAPACITY);
   }, 90_000);
 
@@ -206,12 +240,10 @@ describe("人机", () => {
     const isAuto = (snapshot: LobbyRoomSnapshot) => snapshot.members.find((member) => member.id === idle.id)?.auto === true;
     const autoRoom = await updateWhere(idle, isAuto);
     const idleSeat = seatOf(idle);
-    expect(autoRoom.game!.events.some((event) => event.type === "TurnTimedOut" && event.player === idleSeat)).toBe(true);
+    expect(timedOut(autoRoom, idleSeat)).toBe(true);
 
-    // 托管后轮到他时没有倒计时，人机替他走：之后他的回合不再超时，而是真的行动
-    const hisTurn = await updateWhere(idle, (snapshot) => isAuto(snapshot) && snapshot.game?.players[snapshot.game.currentPlayer]?.id === idleSeat);
-    expect(hisTurn.turnRemainingMs).toBeUndefined();
-    await updateWhere(idle, (snapshot) => actedBy(snapshot, idleSeat));
+    // 托管后人机替他交：之后不再是超时代做，而是人机真的行动（大家同时交，倒计时共用，所以不看 turnRemainingMs）
+    await updateWhere(idle, (snapshot) => isAuto(snapshot) && actedBy(snapshot, idleSeat));
 
     expect((await call<void>((ack) => idle.emit("room:auto", false, ack))).ok).toBe(true);
     await updateWhere(idle, (snapshot) => !isAuto(snapshot));
@@ -232,7 +264,7 @@ describe("人机", () => {
     leaver.disconnect();
 
     const played = await updateWhere(stayer, (snapshot) => actedBy(snapshot, leaverSeat));
-    expect(played.game!.events.some((event) => event.type === "TurnTimedOut")).toBe(false);
+    expect(timedOut(played, leaverSeat)).toBe(false);
     expect(played.members.find((member) => member.playerId === leaverSeat)).toMatchObject({ connected: false });
 
     const back = await connect();

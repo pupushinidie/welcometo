@@ -62,9 +62,9 @@ describe("规则书8.3 隐藏信息", () => {
   it("观战（默认）：谁交的内容都看不到", () => {
     expect(leaks(redactGameForSpectator(full, false), full, null)).toEqual([]);
   });
-  it("观战看全部：能看到每人交的内容，但牌堆和种子仍然看不到", () => {
+  it("观战看全部：交的内容也不给（免得场外报信），牌堆和种子仍然看不到", () => {
     const view = redactGameForSpectator(full, true);
-    expect(view.players.filter((player) => player.pending !== null)).toHaveLength(2);
+    expect(view.players.filter((player) => player.pending !== null)).toHaveLength(0);
     expect(view.stacks.every((stack) => stack.draw.length === 0)).toBe(true);
     expect("seed" in view).toBe(false);
   });

@@ -1,45 +1,46 @@
 // 本地测试用的陪玩机器人（先 npm run dev）。
 //   node scripts/test-bot.mjs host [人数] [机器人数]  → 机器人建房、拉够机器人，等真人加入凑满后自动开局
 //   node scripts/test-bot.mjs join <房间码> [昵称]   → 以一个机器人身份加入别人的房间
-// 机器人轮到自己时：随机挑一种走法；推进后按「再掷爆掉的概率」和本回合掷了几次决定收手还是再掷。
-// 环境变量 BOT_DELAY_MS 控制每步的思考时间（默认 1500），BOT_IDLE=1 时只挂着不动（等超时自动处理），
-// BOT_GREEDY=1 时更贪（更晚收手，方便看爆掉的动画）。
+// 每回合没交时：用规则包里的人机（botCommand，只看自己能看到的状态）交一手；人机不给就交兜底的一手。
+// 环境变量：BOT_DELAY_MS 每步思考时间（默认 1500）；BOT_IDLE=1 只挂着不动（等超时由服务器的人机代做）；
+// BOT_RANDOM=1 随机交（方便看拒批、终局）；BOT_EXIT=1 打完一局就退出（默认自动同意再来一局）；SERVER_URL（默认 http://localhost:3027）、SOCKET_PATH（默认 /socket.io）。
 import { io } from "socket.io-client";
-import { bustProbability, legalActions } from "../packages/game/dist/index.js";
+import { botCommand, createRng, fallbackSubmission, randomSubmission } from "../packages/game/dist/index.js";
 
 const URL = process.env.SERVER_URL ?? "http://localhost:3027";
 const PATH = process.env.SOCKET_PATH ?? "/socket.io";
 const DELAY = Number(process.env.BOT_DELAY_MS ?? 1500);
 const IDLE = process.env.BOT_IDLE === "1";
-const GREEDY = process.env.BOT_GREEDY === "1";
-const NAMES = ["岩羊", "雪豹", "山鹰", "牦牛"];
+const RANDOM = process.env.BOT_RANDOM === "1";
+const EXIT = process.env.BOT_EXIT === "1";
+const NAMES = ["阿花", "老王", "小美", "大刘", "二丫", "三毛"];
+const rng = createRng(Date.now() % 100000);
 
-/** 推进后：爆掉概率越高、本回合已经掷得越多，越倾向收手；能登顶就收手。 */
-function decide(game) {
-  const atTop = game.runners.some((runner) => runner.height >= ({ 2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 11, 9: 9, 10: 7, 11: 5, 12: 3 })[runner.column]);
-  if (atTop && !GREEDY) return { type: "STOP" };
-  const risk = bustProbability(game);
-  const appetite = GREEDY ? 0.6 : 0.35;
-  return risk + game.rollsThisTurn * 0.05 > appetite + Math.random() * 0.15 ? { type: "STOP" } : { type: "ROLL" };
+function choose(game, seat) {
+  if (RANDOM) return randomSubmission(game, seat, rng);
+  return botCommand(game, seat) ?? fallbackSubmission(game, seat);
 }
 
 function bot(name, onRoom) {
   const socket = io(URL, { path: PATH, transports: ["websocket"] });
   let acting = false;
+  let endedAt = -1;
   let latest = null;
   const emit = (event, ...args) => new Promise((resolve) => socket.emit(event, ...args, resolve));
   // 回执和新状态的广播可能在同一批消息里到达：每做完一步都回头看最新状态，免得漏掉轮到自己。
   async function tick() {
     const room = latest;
     const game = room?.game;
-    if (!game || game.phase === "finished" || IDLE || acting) return;
+    if (!game || game.phase !== "play" || IDLE || acting) return;
     const seat = room.members.find((member) => member.id === socket.id)?.playerId;
-    if (!seat || legalActions(game, seat).length === 0) return;
+    const me = game.players.find((player) => player.id === seat);
+    if (!seat || !me || me.submitted) return;
     acting = true;
     await new Promise((resolve) => setTimeout(resolve, DELAY));
     try {
-      const actions = legalActions(game, seat);
-      const command = game.stage === "decide" ? decide(game) : actions[Math.floor(Math.random() * actions.length)];
+      const current = latest?.game;
+      if (!current || current.phase !== "play" || current.players.find((player) => player.id === seat)?.submitted) return;
+      const command = { type: "submit", submission: choose(current, seat), step: `r${current.round}` };
       const result = await emit("game:command", command);
       if (!result.ok) console.log(name, "行动失败", result.error);
     } finally {
@@ -51,10 +52,15 @@ function bot(name, onRoom) {
     latest = room;
     onRoom?.(room, socket);
     const game = room.game;
-    if (game?.phase === "finished") {
-      const scores = game.players.map((player) => `${player.name}:${player.score}`).join(" ");
-      console.log(name, "游戏结束，登顶数", scores, "胜者", game.finalResult?.winner);
-      setTimeout(() => process.exit(0), 200);
+    if (game?.phase === "gameOver") {
+      const scores = game.players.map((player) => `${player.name}:${game.finalResult.scores[player.id].total}`).join(" ");
+      if (endedAt !== game.version) {
+        endedAt = game.version;
+        console.log(name, "游戏结束", scores, "胜者", game.finalResult.winners.join(","), "原因", game.finalResult.reasons.join(","));
+        if (EXIT) setTimeout(() => process.exit(0), 200);
+        // 自动同意再来一局（真人点了「再来一局」就接着打）
+        else void emit("room:rematch", true);
+      }
       return;
     }
     void tick();
