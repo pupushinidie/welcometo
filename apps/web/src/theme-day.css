@@ -15,6 +15,13 @@
     var(--scene) center / cover no-repeat,
     #ffffff;
 }
+/* 首页/等候房的全屏背景换成白天那张街景图（生成的规则会照抄夜间的图） */
+:root[data-theme="day"] body .app-shell.wt-page {
+  background:
+    linear-gradient(rgba(255, 250, 240, 0.45), rgba(255, 250, 240, 0.45)),
+    var(--bg-day) center / 1536px 864px no-repeat,
+    #fff8ec;
+}
 :root[data-theme="day"] .wt-top { background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 0 0 #2e1f3a; }
 /* 计分区的空格：夜间是半透明白，白天换成半透明紫 */
 :root[data-theme="day"] .wt-cell:not(.on),

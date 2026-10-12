@@ -2,7 +2,7 @@
  * 首页和等候房间（欢迎来到的排版；颜色、像素边框沿用 app-pixel.css）。
  * 桌面三种尺寸一屏放下：在线牌桌、聊天这类可能很长的东西在自己的格子里滚动。
  */
-.app-shell.wt-page { width: 100%; max-width: none; margin: 0; height: 100vh; min-height: 0; padding: 0 16px 12px; box-sizing: border-box; }
+.app-shell.wt-page { width: 100%; max-width: none; margin: 0; height: 100vh; min-height: 0; padding: 0 16px 12px; box-sizing: border-box; background: linear-gradient(rgba(30, 20, 40, 0.5), rgba(30, 20, 40, 0.62)), var(--bg-night) center / 1536px 864px no-repeat, #1c1426; image-rendering: pixelated; }
 .app-shell .wt-pagebar { flex: 0 0 auto; height: 56px; gap: 12px; white-space: nowrap; }
 .app-shell .wt-pagebar .topbar-right { gap: 10px; }
 .app-shell .brand { gap: 8px; }
@@ -22,7 +22,7 @@
   min-height: 0;
   padding-top: 12px;
 }
-.wt-home-hero { grid-area: hero; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.wt-home-hero { grid-area: hero; display: flex; flex-direction: column; gap: 12px; min-height: 0; padding: 12px; background: rgba(30, 22, 42, 0.86); box-shadow: 0 0 0 var(--px) var(--edge); }
 .wt-entry { grid-area: entry; align-self: center; }
 .wt-home-hero { align-self: center; }
 .wt-home-rooms { grid-area: rooms; min-height: 0; overflow-y: auto; }
@@ -165,7 +165,7 @@
   .wt-home-hero { display: contents; }
   .wt-hero-art { order: 1; }
   .wt-entry { order: 2; }
-  .wt-lead { order: 3; }
+  .wt-lead { order: 3; padding: 8px 10px; background: rgba(30, 22, 42, 0.86); }
   .app-shell .wt-entry .entry-card-heading { display: none; }
   .app-shell .wt-entry { padding: 12px 14px; }
   .app-shell .wt-entry .entry-form { margin-top: 8px; }

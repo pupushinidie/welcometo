@@ -81,3 +81,10 @@ export function seatInk(seat: number): string {
 export function sceneFor(theme: "day" | "night"): string {
   return theme === "day" ? ART.bgDay : ART.bgNight;
 }
+
+/** 样式表里要用的图（CSS 里写死路径在子路径下会坏）：挂到 :root 的 CSS 变量上，首页/等候房铺全屏背景用。 */
+export function installArtVars(): void {
+  const style = document.documentElement.style;
+  style.setProperty("--bg-night", `url(${ART.bgNight})`);
+  style.setProperty("--bg-day", `url(${ART.bgDay})`);
+}
